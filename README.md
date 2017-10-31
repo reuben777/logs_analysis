@@ -37,17 +37,22 @@ $ vagrant up
 4. Load the data in: `@vagrant$ psql -d news -f newsdata.sql`
    - `psql` — the PostgreSQL command line program
    - `-d news` — connect to the database named news which has been set up for you
-   - `-f newsdata.sql` — run the SQL statements in the file newsdata.sql
+   - `-f newsdata.sql` — run the SQL statements in the file _newsdata.sql_
 
-5. Now run the python program `@vagrant$ python newsdata.py`
+5. Same for `newsdata_custom.sql`
+   - `@vagrant$ psql -d news -f newsdata_custom.sql`
+
+6. Now run the python program `@vagrant$ python newsdata_custom.sql`
 
 ## API
 
-### DB Overview
-Language - _Postgresql_
+## DB Overview
 
-#### Tables:
-* articles
+### Language
+Postgresql
+
+### Tables:
+* _articles_
 
 Column | Type | Modifiers
 :---:|:---:|:---:
@@ -59,7 +64,7 @@ body   | *text* |
 time   | *timestamp* with time zone | default `now()`
 id     | *integer* | not `null` default `nextval('articles_id_seq'::regclass)`
 
-* authors:
+* _authors_
 
 Column | Type | Modifiers
 :--:|:---:|:---:
@@ -67,7 +72,7 @@ name | *text* | not `null`
 bio | *text* |
 id | *integer* | not `null` default `nextval('authors_id_seq'::regclass)`
 
-* log
+* _log_
 
 Column | Type | Modifiers
 :---:|:---:|:---:
