@@ -35,8 +35,48 @@ $ vagrant up
 3. Change directory to vagrant shared files: `cd /vagrant`
 
 4. Load the data in: `@vagrant$ psql -d news -f newsdata.sql`
+   - `psql` — the PostgreSQL command line program
+   - `-d news` — connect to the database named news which has been set up for you
+   - `-f newsdata.sql` — run the SQL statements in the file newsdata.sql
 
 5. Now run the python program `@vagrant$ python newsdata.py`
+
+## API
+
+### DB Overview
+Language - _Postgresql_
+
+#### Tables:
+* articles
+
+Column | Type | Modifiers
+:---:|:---:|:---:
+author | integer | not `null`
+title  | *text* | not `null`
+slug   | *text* | not `null`
+lead   | *text* |
+body   | *text* |
+time   | *timestamp* with time zone | default `now()`
+id     | *integer* | not `null` default `nextval('articles_id_seq'::regclass)`
+
+* authors:
+
+Column | Type | Modifiers
+:--:|:---:|:---:
+name | *text* | not `null`
+bio | *text* |
+id | *integer* | not `null` default `nextval('authors_id_seq'::regclass)`
+
+* log
+
+Column | Type | Modifiers
+:---:|:---:|:---:
+path | *text* |
+ip | *inet* |
+method | *text* |
+status | *text* |
+time | *timestamp* with time zone | default `now()`
+id | *integer* | not `null` default `nextval('log_id_seq'::regclass)`
 
 ## License
 Licensed under the [MIT License](https://github.com/reuben777/logs_analysis/LICENSE.md)
