@@ -71,14 +71,34 @@ def upchuckAuthorViews():
         writePrintStr(file_line)
 
 
+# WHERE l.status != '200 OK'
 def upchuckErrorDays():
     writePrintStr('On which days did more than 1% of requests lead to errors?')
     error_days = fetchAll('''
-    SELECT l.status, l.time from log as l where l.status != '200 OK'
-    GROUP BY (l.time, l.status)
-    limit 5;
+    SELECT
+    lok.status,
+    lforofor.status as error,
+    date_trunc('day', lok.time) as day,
+    count(lok.id) as occurences
+    FROM log AS lok
+        RIGHT JOIN (
+            SELECT
+            logg.status,
+            date_trunc('day', logg.time) as errorday,
+            count(logg.id) as occurences
+            FROM log AS logg
+            WHERE logg.status NOT LIKE CONCAT('%','200 OK', '%')
+            GROUP BY (logg.status, day)
+            LIMIT 20
+            ) as lforofor
+        ON day = errorday
+    GROUP BY (lok.status, day, error)
+    LIMIT 20;
     ''')
-    print(error_days)
+    # print(error_days)
+    for error in error_days:
+        print("status: {}, error: {}, day: {}, count: {}".format(
+            error[0], error[1], error[2], error[3]))
 
 
 init()
