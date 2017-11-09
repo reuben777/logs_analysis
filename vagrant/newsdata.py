@@ -44,7 +44,7 @@ def writePrintStr(question=''):
 
 
 def upchuckArticleViews():
-    writePrintStr('What are the most popular three articles of all time?')
+    writePrintStr('What are the most popular three articles of all time?\n')
     articles = fetchAll('''
     SELECT title, popularity
         from article_log
@@ -58,7 +58,7 @@ def upchuckArticleViews():
 
 
 def upchuckAuthorViews():
-    writePrintStr('Who are the most popular article authors of all time?')
+    writePrintStr('Who are the most popular article authors of all time?\n')
     authors = fetchAll('''
     SELECT a.name, sum(al.popularity) as author_popularity
     FROM article_log as al
@@ -74,7 +74,7 @@ def upchuckAuthorViews():
 
 # WHERE l.status != '200 OK'
 def upchuckErrorDays():
-    writePrintStr('On which days did more than 1% of requests lead to errors?')
+    writePrintStr('On which days did more than 1% of requests lead to errors?\n')
     error_days = fetchAll('''
     SELECT subq.day, subq.perc from log as log_info
     RIGHT JOIN
@@ -106,7 +106,7 @@ def upchuckErrorDays():
         perc = Decimal(error[1]).quantize(
             Decimal('.1'), rounding=ROUND_DOWN)
         day = datetime.strftime(error[0], '%B %d, %Y')
-        file_line = "{} - {}% errors \n".format(
+        file_line = "{} - {}% errors\n".format(
             day, perc)
         writePrintStr(file_line)
 
