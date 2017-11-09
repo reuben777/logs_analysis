@@ -74,7 +74,8 @@ def upchuckAuthorViews():
 
 # WHERE l.status != '200 OK'
 def upchuckErrorDays():
-    writePrintStr('On which days did more than 1% of requests lead to errors?\n')
+    writePrintStr(
+        'On which days did more than 1% of requests lead to errors?\n')
     error_days = fetchAll('''
     SELECT subq.day, subq.perc from log as log_info
     RIGHT JOIN
