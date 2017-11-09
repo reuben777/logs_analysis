@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import psycopg2
-import datetime
+from datetime import datetime
+from decimal import Decimal, ROUND_DOWN
 
 global report_file
 
@@ -14,11 +15,11 @@ def init(filename=''):
         report_file = open(filename + '.txt', 'w')
     else:
         # Date based reporting file
-        t = datetime.datetime.now().strftime("%y_%m_%d_%H_%M_%S")
+        t = datetime.now().strftime("%y_%m_%d_%H_%M_%S")
         report_file = open('reports/' + t + '_report' + '.txt', 'w')
         writePrintStr("Report Generated on: {} \n".format(t))
-    # upchuckArticleViews()
-    # upchuckAuthorViews
+    upchuckArticleViews()
+    upchuckAuthorViews()
     upchuckErrorDays()
     report_file.close()
 
@@ -48,11 +49,11 @@ def upchuckArticleViews():
     SELECT title, popularity
         from article_log
         order by popularity DESC
-        limit 3
+        limit 3;
     ''')
     for article in articles:
         str_views = str(int(article[1]))
-        file_line = '  "{}"" - {} views\n'.format(article[0], str_views)
+        file_line = '  "{}" - {} views\n'.format(article[0], str_views)
         writePrintStr(file_line)
 
 
@@ -63,7 +64,7 @@ def upchuckAuthorViews():
     FROM article_log as al
     LEFT JOIN authors as a ON al.author_id = a.id
     GROUP BY (al.author_id, a.name)
-    ORDER BY author_popularity DESC
+    ORDER BY author_popularity DESC;
     ''')
     for author in authors:
         str_views = str(int(author[1]))
@@ -75,30 +76,39 @@ def upchuckAuthorViews():
 def upchuckErrorDays():
     writePrintStr('On which days did more than 1% of requests lead to errors?')
     error_days = fetchAll('''
-    SELECT
-    lok.status,
-    lforofor.status as error,
-    date_trunc('day', lok.time) as day,
-    count(lok.id) as occurences
-    FROM log AS lok
-        RIGHT JOIN (
-            SELECT
-            logg.status,
-            date_trunc('day', logg.time) as errorday,
-            count(logg.id) as occurences
-            FROM log AS logg
-            WHERE logg.status NOT LIKE CONCAT('%','200 OK', '%')
-            GROUP BY (logg.status, day)
-            LIMIT 20
-            ) as lforofor
-        ON day = errorday
-    GROUP BY (lok.status, day, error)
-    LIMIT 20;
+    SELECT subq.day, subq.perc from log as log_info
+    RIGHT JOIN
+    (SELECT
+        lgood.goodday as day,
+        lgood.goodoccurences as goodcount,
+        (count(*)::decimal / lgood.goodoccurences::decimal)*100 as perc,
+        count(*) as occurences
+        FROM log AS lbad
+            RIGHT JOIN (
+                SELECT
+                date_trunc('day', logg.time) as goodday,
+                count(*) as goodoccurences
+                FROM log AS logg
+                WHERE logg.status LIKE CONCAT('%','200 OK', '%')
+                GROUP BY 1
+                LIMIT 20
+            ) as lgood
+            ON date_trunc('day', lbad.time) = lgood.goodday
+    WHERE lbad.status NOT LIKE CONCAT('%','200 OK', '%')
+    GROUP BY 1,2)
+    as subq
+    ON date_trunc('day', log_info.time) = subq.day
+    WHERE subq.perc > 1
+    GROUP BY 1,2;
     ''')
-    # print(error_days)
+
     for error in error_days:
-        print("status: {}, error: {}, day: {}, count: {}".format(
-            error[0], error[1], error[2], error[3]))
+        perc = Decimal(error[1]).quantize(
+            Decimal('.1'), rounding=ROUND_DOWN)
+        day = datetime.strftime(error[0], '%B %d, %Y')
+        file_line = "{} - {}% errors \n".format(
+            day, perc)
+        writePrintStr(file_line)
 
 
 init()
