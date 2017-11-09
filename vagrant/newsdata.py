@@ -106,7 +106,7 @@ def upchuckErrorDays():
         perc = Decimal(error[1]).quantize(
             Decimal('.1'), rounding=ROUND_DOWN)
         day = datetime.strftime(error[0], '%B %d, %Y')
-        file_line = "{} - {}% errors\n".format(
+        file_line = "  {} - {}% errors\n".format(
             day, perc)
         writePrintStr(file_line)
 
